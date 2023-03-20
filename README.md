@@ -18,7 +18,8 @@
 
 4.기능 점검을 위한 빌드 결과물
   1) 다운로드 링크 : https://drive.google.com/file/d/118y6zU7Vy4SRsjz3gewG_25QZ00fJvFI/view?usp=sharing
-  2) 주의사항<br>
+  2) 서비스 포트 : 8080<br>
+  3) 주의사항<br>
     - jar파일 다운로드하는데 시간이 좀 걸립니다 기다려주세요.<br>
     - JDK 17 사용한 프로젝트로 java-jar 실행시 안되면 jDK 버전 확인 요청드립니다.
 
