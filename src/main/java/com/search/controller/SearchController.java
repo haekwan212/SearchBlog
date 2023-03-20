@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.search.entity.SearchQueryEntity;
 import com.search.page.Page;
 import com.search.service.InquireSearchQueryService;
-import com.search.service.KakaoSearchService;
-import com.search.service.NaverSearchService;
+import com.search.service.impl.KakaoBlogSearchServiceImpl;
+import com.search.service.impl.NaverBlogSearchServiceImpl;
 import com.search.vo.BlogItemVO;
 
 import reactor.core.publisher.Mono;
@@ -21,10 +21,10 @@ import reactor.core.publisher.Mono;
 public class SearchController {
 
 	private final InquireSearchQueryService inquireSearchQueryService; // 인기 검색어 조회 서비스
-    private final KakaoSearchService kakaoSearchService; // 카카오 블로그 검색 API 서비스
-    private final NaverSearchService naverSearchService; // 네이버 블로그 검색 API 서비스
+    private final KakaoBlogSearchServiceImpl kakaoSearchService; // 카카오 블로그 검색 API 서비스
+    private final NaverBlogSearchServiceImpl naverSearchService; // 네이버 블로그 검색 API 서비스
 
-    public SearchController(KakaoSearchService kakaoSearchService, NaverSearchService naverSearchService, InquireSearchQueryService inquireSearchQueryService) {
+    public SearchController(KakaoBlogSearchServiceImpl kakaoSearchService, NaverBlogSearchServiceImpl naverSearchService, InquireSearchQueryService inquireSearchQueryService) {
         this.kakaoSearchService = kakaoSearchService;
         this.inquireSearchQueryService = inquireSearchQueryService;
         this.naverSearchService = naverSearchService;
@@ -52,18 +52,18 @@ public class SearchController {
         if (query == null || query.isEmpty()) {
             throw new IllegalArgumentException("query parameter is required");
         }
-        // page 최대값 50으로 제한 예외 처리
-        if (page > 50) {
-            throw new IllegalArgumentException("page is more than max");
+        // page 최솟값 1, 최대값 50으로 제한 예외 처리
+        if (1 > page ||  page > 50) {
+            throw new IllegalArgumentException("Invalid page parameter value: " + page);
         }
-        // size 최대값 50으로 제한 예외 처리
-        if (size > 50) {
-            throw new IllegalArgumentException("page is more than max");
+        // size 최솟값 1, 최대값 50으로 제한 예외 처리
+        if (1 > size ||  size > 50) {
+            throw new IllegalArgumentException("Invalid size parameter value:" + size);
         }
         
-        // sort
+        // sort 값 1,2 외 값 예외 처리
         if (sort != 1 && sort != 2) {
-            throw new IllegalArgumentException("Invalid sort value: " + sort);
+            throw new IllegalArgumentException("Invalid sort parameter value: " + sort);
         }
         
         Mono<Page<BlogItemVO>> resultPage = null;

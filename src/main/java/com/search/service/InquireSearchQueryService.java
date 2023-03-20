@@ -15,7 +15,6 @@ public class InquireSearchQueryService {
     private SearchQueryRepository searchQueryRepository;
 	
 	public List<SearchQueryEntity> inquireSearchQuery() {
-		//List<SearchQueryEntity> resultList = searchQueryRepository.findTop10ByOrderByCountDesc();
 		return searchQueryRepository.findTop10ByOrderByCountDesc();
     }
 }
