@@ -16,52 +16,53 @@ import com.search.entity.SearchQueryEntity;
 import com.search.page.Page;
 import com.search.repository.SearchQueryRepository;
 import com.search.vo.BlogItemVO;
-import com.search.vo.KakaoBlogVO;
+import com.search.vo.NaverBlogVO;
 
 import reactor.core.publisher.Mono;
 
 @Service
-public class KakaoSearchService {
+public class NaverSearchService {
 
     @Autowired
     private SearchQueryRepository searchQueryRepository;
     
 	private final WebClient webClient;
 	
-    private static final String KAKAO_SERVER_BLOG_SEARCH_API  = "https://dapi.kakao.com/v2/search/blog";
+    private static final String NAVER_SERVER_BLOG_SEARCH_API  = "https://openapi.naver.com/v1/search/blog";
 
-    public KakaoSearchService(@Value("${kakao.api.key}") String kakaoApiKey ,WebClient.Builder webClientBuilder) {
+    public NaverSearchService(@Value("${naver.client.id}") String naverClientId, @Value("${naver.client.secret}") String naverClientSecret, WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder
-        .baseUrl(KAKAO_SERVER_BLOG_SEARCH_API)
-        .defaultHeader("Authorization", "KakaoAK " + kakaoApiKey ) 
+        .baseUrl(NAVER_SERVER_BLOG_SEARCH_API)
+        .defaultHeader("X-Naver-Client-Id",  naverClientId )
+        .defaultHeader("X-Naver-Client-Secret", naverClientSecret )
         .build();
     }
     
     public Mono<Page<BlogItemVO>> searchBlog(String query, String sort, int page, int size) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .queryParam("query", query)
-                        .queryParam("sort", sort)
-                        .queryParam("page", page)
-                        .queryParam("size", size)
+                        .queryParam("query"		, query) 	//검색어
+                        .queryParam("display"	, size)		// 한페이지에 보여줄 글 수
+                        .queryParam("sort"		, sort) 	// sim :정확도, date(
+                        .queryParam("start"		, page) 	// 검색 시작 위치
                         .build())
                 .retrieve()
-                .bodyToMono(KakaoBlogVO.class)
-                .map(kakaoBlogVO -> {
-                    List<BlogItemVO> blogItemList = kakaoBlogVO.getDocuments().stream().map(document -> {
+                .bodyToMono(NaverBlogVO.class)
+                .map(naverBlogVO -> {
+                    List<BlogItemVO> blogItemList = naverBlogVO.getItems().stream().map(item -> {
                         BlogItemVO blogItem = new BlogItemVO();
-                        blogItem.setBloggername(document.getBlogname());
-                        blogItem.setDescription(document.getContents());
-                        blogItem.setTitle(document.getTitle());
-                        blogItem.setUrl(document.getUrl());
-                        blogItem.setDatetime(document.getDatetime());
+                        blogItem.setBloggername(item.getBloggername());
+                        blogItem.setDescription(item.getDescription());
+                        blogItem.setTitle(item.getTitle());
+                        blogItem.setUrl(item.getLink());
+                        blogItem.setDatetime(item.getPostdate());
                         return blogItem;
                     }).collect(Collectors.toList());
                     
                     // 검색어 조회수 저장 
                     increaseCountOrInsert(query);
                     
-                    return new Page<BlogItemVO>(blogItemList, page, size, kakaoBlogVO.getMeta().getPageableCount(), kakaoBlogVO.getMeta().isEnd());
+                    return new Page<BlogItemVO>(blogItemList, page, size, naverBlogVO.getTotal(), true);
                 })
                 .onErrorResume(WebClientResponseException.class, e -> {
                     if (HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {

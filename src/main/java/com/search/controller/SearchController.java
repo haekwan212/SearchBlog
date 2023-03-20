@@ -12,6 +12,7 @@ import com.search.entity.SearchQueryEntity;
 import com.search.page.Page;
 import com.search.service.InquireSearchQueryService;
 import com.search.service.KakaoSearchService;
+import com.search.service.NaverSearchService;
 import com.search.vo.BlogItemVO;
 
 import reactor.core.publisher.Mono;
@@ -21,12 +22,12 @@ public class SearchController {
 
 	private final InquireSearchQueryService inquireSearchQueryService; // 인기 검색어 조회 서비스
     private final KakaoSearchService kakaoSearchService; // 카카오 블로그 검색 API 서비스
-//    private final NaverSearchService naverSearchService; // 네이버 블로그 검색 API 서비스
+    private final NaverSearchService naverSearchService; // 네이버 블로그 검색 API 서비스
 
-    public SearchController(KakaoSearchService kakaoSearchService, InquireSearchQueryService inquireSearchQueryService) {
+    public SearchController(KakaoSearchService kakaoSearchService, NaverSearchService naverSearchService, InquireSearchQueryService inquireSearchQueryService) {
         this.kakaoSearchService = kakaoSearchService;
         this.inquireSearchQueryService = inquireSearchQueryService;
-//        this.naverSearchService = naverSearchService;
+        this.naverSearchService = naverSearchService;
     }
 	
     /**
@@ -60,9 +61,9 @@ public class SearchController {
             throw new IllegalArgumentException("page is more than max");
         }
         
-        // size 최대값 50으로 제한 예외 처리
-		if (sort == 1 && sort == 2) {
-            throw new IllegalArgumentException("sort is more than max");
+        // sort
+        if (sort != 1 && sort != 2) {
+            throw new IllegalArgumentException("Invalid sort value: " + sort);
         }
         
         Mono<Page<BlogItemVO>> resultPage = null;
@@ -71,15 +72,23 @@ public class SearchController {
         
         switch (type) {
             case 1: // 카카오 블로그 검색 API 
-            	if(sort==1) {
-            		sortStr = "accuracy";
-            	}else if(sort==2){
-            		sortStr = "recency";
-            	}
+				if (sort == 1) {
+					sortStr = "accuracy"; // 정확도순
+				} else if (sort == 2) {
+					sortStr = "recency"; // 최신순
+				}
+				
                 resultPage = kakaoSearchService.searchBlog(query, sortStr, page, size);
                 break;
             case 2: // 네이버 블로그 검색 API
-                //resultPage = naverSearchService.searchBlog(query, sort, page, size);
+				if (sort == 1) {
+					sortStr = "sim"; // 정확도순
+				} else if (sort == 2) {
+					sortStr = "date"; // 최신순
+				}
+				
+                resultPage = naverSearchService.searchBlog(query, sortStr, page, size);
+                
                 break;
             default:
                 throw new IllegalArgumentException("Invalid search type: " + type);
