@@ -18,13 +18,13 @@ dependencies {
 	
 	implementation 'com.fasterxml.jackson.core:jackson-databind' //json 데이터 바인드
 	implementation 'org.projectlombok:lombok:1.18.20' // 롬복
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' //h2
+	annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // jpa
     runtimeOnly 'com.h2database:h2'
     
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'io.projectreactor:reactor-test'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+bootJar {
+	mainClass = 'com.search.SerchBlogApplication'
 }
+
