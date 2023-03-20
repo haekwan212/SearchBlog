@@ -1,26 +1,26 @@
 package com.search.page;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Page<T> {
-    private List<T> content;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class Page<T> implements Serializable{ //직렬화
+    private List<T> item;
     private int pageNumber;
     private int pageSize;
-    private int totalElements;
+    private int totalCount;
+    private boolean nextEnd;
     
-    public Page(List<T> content, int pageNumber, int pageSize, int totalElements) {
-        this.content = content;
+    public Page(List<T> item, int pageNumber, int pageSize, int totalCount, boolean nextEnd) {
+        this.item = item;
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
-        this.totalElements = totalElements;
+        this.totalCount = totalCount;
+        this.nextEnd = nextEnd;
     }
     
-    public void to1String() {
-    	for (T item : content) {
-    	    System.out.println(item.toString());
-    	}
-    	System.out.println("pageNumber : " + pageNumber);
-    	System.out.println("pageSize : " + pageSize);
-    	System.out.println("totalElements : " + totalElements);
-    }
 }
