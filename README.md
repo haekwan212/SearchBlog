@@ -7,7 +7,7 @@
 - Java Persistence API (JPA)
 
 2.프로젝트 구현 기능
-  1) 카카오 블로그 검색
+1) 카카오 블로그 검색
   2) 네이버 블로그 검색(추가)
   3) 인기검색어 상위 10개 조회 기능
     - inMemory DB(h2) 사용으로 서버 down시 데이터 같이 삭제(file모드 OFF)
